@@ -5,8 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AmbientHue"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="Ambient Hue Configuration" Height="350" Width="525">
     <Grid>
-        
+        <Label x:Name="lblBridge" Content="Bridge" HorizontalAlignment="Left" Margin="43,31,0,0" VerticalAlignment="Top"/>
+        <ComboBox x:Name="cmbBridge" HorizontalAlignment="Left" Margin="86,34,0,0" VerticalAlignment="Top" Width="120"/>
+        <Button x:Name="btnLocate" Content="Locate" HorizontalAlignment="Left" Margin="211,37,0,0" VerticalAlignment="Top" Width="75" Click="btnLocate_Click"/>
     </Grid>
 </Window>

@@ -3,6 +3,9 @@ using System.Windows.Input;
 
 namespace AmbientHue
 {
+    using System.Threading;
+    using System.Threading.Tasks;
+
     /// <summary>
     /// Provides bindable properties and commands for the NotifyIcon. In this sample, the
     /// view model is assigned to the NotifyIcon in XAML. Alternatively, the startup routing
@@ -10,6 +13,9 @@ namespace AmbientHue
     /// </summary>
     public class NotifyIconViewModel
     {
+        private CancellationTokenSource cancellationToken;
+        private Task captureTask;
+
         /// <summary>
         /// Shows a window, if none is already open.
         /// </summary>
@@ -25,6 +31,40 @@ namespace AmbientHue
                         Application.Current.MainWindow = new MainWindow();
                         Application.Current.MainWindow.Show();
                     }
+                };
+            }
+        }
+
+        public ICommand StartAmbientCaptureCommand
+        {
+            get
+            {
+                return new DelegateCommand
+                {
+                    CommandAction = () =>
+                        {
+                            this.cancellationToken = new CancellationTokenSource();
+                            this.captureTask = new Task(() => MainWindow.StartCapture(this.cancellationToken));
+                            this.captureTask.Start();
+                        },
+                    CanExecuteFunc = () => this.captureTask == null
+                };
+            }
+        }
+
+        public ICommand StopAmbientCaptureCommand
+        {
+            get
+            {
+                return new DelegateCommand
+                {
+                    CommandAction = () =>
+                        {
+                            this.cancellationToken.Cancel();
+                            this.cancellationToken = null;
+                            this.captureTask = null;
+                        },
+                    CanExecuteFunc = () => this.captureTask != null
                 };
             }
         }
@@ -52,7 +92,7 @@ namespace AmbientHue
         {
             get
             {
-                return new DelegateCommand {CommandAction = () => Application.Current.Shutdown()};
+                return new DelegateCommand { CommandAction = () => Application.Current.Shutdown() };
             }
         }
     }
