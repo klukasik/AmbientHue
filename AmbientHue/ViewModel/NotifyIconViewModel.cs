@@ -14,7 +14,7 @@
     /// </summary>
     public class NotifyIconViewModel
     {
-        private readonly HueConfiguration hueConfiguration;
+        private readonly IHueConfiguration hueConfiguration;
         private CancellationTokenSource cancellationToken;
         private Task captureTask;
 

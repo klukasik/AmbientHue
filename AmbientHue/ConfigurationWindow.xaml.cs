@@ -15,7 +15,6 @@ namespace AmbientHue
         public ConfigurationWindow()
         {
             InitializeComponent();
-            this.DataContext = new ConfigurationViewModel();
         }
     }
 }

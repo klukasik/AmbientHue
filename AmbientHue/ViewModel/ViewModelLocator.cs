@@ -42,17 +42,15 @@ namespace AmbientHue.ViewModel
             ////    SimpleIoc.Default.Register<IDataService, DataService>();
             ////}
 
+            SimpleIoc.Default.Register<IHueConfiguration, HueConfiguration>();
             SimpleIoc.Default.Register<ConfigurationViewModel>();
+            SimpleIoc.Default.Register<NotifyIconViewModel>();
         }
 
-        public ConfigurationViewModel Main
-        {
-            get
-            {
-                return ServiceLocator.Current.GetInstance<ConfigurationViewModel>();
-            }
-        }
-        
+        public ConfigurationViewModel Configuration => ServiceLocator.Current.GetInstance<ConfigurationViewModel>();
+
+        public NotifyIconViewModel NotifyIcon => ServiceLocator.Current.GetInstance<NotifyIconViewModel>();
+
         public static void Cleanup()
         {
             // TODO Clear the ViewModels

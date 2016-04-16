@@ -3,7 +3,7 @@ namespace AmbientHue.ViewModel
     using System;
     using System.Collections.ObjectModel;
     using System.Linq;
-    using System.Windows.Input;
+    using System.Threading;
 
     using GalaSoft.MvvmLight;
     using GalaSoft.MvvmLight.Command;
@@ -14,7 +14,7 @@ namespace AmbientHue.ViewModel
 
     public class ConfigurationViewModel : ViewModelBase
     {
-        private readonly IHueConfiguration hueConfiguration = new HueConfiguration();
+        private readonly IHueConfiguration hueConfiguration;
 
         private readonly ObservableCollection<string> bridges = new ObservableCollection<string>();
 
@@ -32,6 +32,9 @@ namespace AmbientHue.ViewModel
             {
                 this.hueConfiguration.IP = value;
                 this.selectedBridge = value;
+
+                this.RaisePropertyChanged(() => this.SelectedBridge);
+                this.RegisterCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -48,7 +51,8 @@ namespace AmbientHue.ViewModel
                 this.hueConfiguration.AppKey = value;
                 this.appKey = value;
 
-                LoadLights();
+                this.RaisePropertyChanged(() => this.AppKey);
+                this.RegisterCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -66,11 +70,15 @@ namespace AmbientHue.ViewModel
             {
                 this.hueConfiguration.LightName = value;
                 this.selectedLight = value;
+
+                this.RaisePropertyChanged(() => this.SelectedLight);
             }
         }
 
-        public ConfigurationViewModel()
+        public ConfigurationViewModel(IHueConfiguration hueConfiguration)
         {
+            this.hueConfiguration = hueConfiguration;
+
             var defaultBridge = this.hueConfiguration.IP;
             if (this.bridges.Contains(defaultBridge) == false)
             {
@@ -78,7 +86,9 @@ namespace AmbientHue.ViewModel
             }
             this.selectedBridge = defaultBridge;
 
-            this.AppKey = this.hueConfiguration.AppKey;
+            this.appKey = this.hueConfiguration.AppKey;
+
+            this.LoadLights();
 
             var defaultLightName = this.hueConfiguration.LightName;
             if (this.lights.Contains(defaultLightName) == false)
@@ -86,54 +96,59 @@ namespace AmbientHue.ViewModel
                 this.lights.Add(defaultLightName);
             }
             this.selectedLight = defaultLightName;
-        }
 
-        public ICommand LocateCommand
-        {
-            get
-            {
-                return new RelayCommand(
+            this.LocateCommand = new RelayCommand(
+                    async () =>
+                    {
+                        this.bridges.Clear();
+
+                        IBridgeLocator locator = new SSDPBridgeLocator();
+                        (await locator.LocateBridgesAsync(TimeSpan.FromSeconds(1))).ToList()
+                            .ForEach(bridge => this.bridges.Add(bridge));
+
+                        if (this.bridges.Contains(this.SelectedBridge) == false)
+                        {
+                            this.SelectedBridge = this.bridges.Count > 0 ? this.bridges[0] : null;
+                        }
+                    });
+
+            this.RegisterCommand = new RelayCommand(
                     async () =>
                         {
-                            this.bridges.Clear();
 
-                            IBridgeLocator locator = new SSDPBridgeLocator();
-                            (await locator.LocateBridgesAsync(TimeSpan.FromSeconds(10))).ToList()
-                                .ForEach(bridge => this.bridges.Add(bridge));
 
-                            if (this.bridges.Contains(this.SelectedBridge) == false)
+                            int nrOfTries = 1;
+                            while (nrOfTries < 30)
                             {
-                                if (this.bridges.Count > 0)
+                                try
                                 {
-                                    this.SelectedBridge = this.bridges[0];
+                                    ILocalHueClient client = new LocalHueClient(this.selectedBridge);
+                                    this.AppKey = await client.RegisterAsync("AmbientHue", "v0.1");
+                                    break;
                                 }
-                                else
+                                catch (Exception)
                                 {
-                                    this.SelectedBridge = null;
+                                    nrOfTries++;
+                                    Thread.Sleep(500);
                                 }
                             }
 
-                            this.RaisePropertyChanged();
-                        });
-            }
+                            this.LoadLights();
+                    },
+                    () => string.IsNullOrEmpty(this.selectedBridge) == false && string.IsNullOrEmpty(this.appKey));
         }
 
-        public ICommand RegisterCommand
+        public RelayCommand LocateCommand
         {
-            get
-            {
-                return new RelayCommand(
-                    async () =>
-                        {
-                            ILocalHueClient client = new LocalHueClient(this.selectedBridge);
-                            this.AppKey = await client.RegisterAsync("AmbientHue", "v0.1");
-                        },
-                    () => string.IsNullOrEmpty(this.selectedBridge) == false);
-            }
+            get; set;
         }
+
+        public RelayCommand RegisterCommand { get; set; }
 
         private async void LoadLights()
         {
+            this.lights.Clear();
+
             if (string.IsNullOrEmpty(this.selectedBridge) || string.IsNullOrEmpty(this.appKey))
             {
                 return;
@@ -147,17 +162,8 @@ namespace AmbientHue.ViewModel
 
             if (this.lights.Contains(this.SelectedLight) == false)
             {
-                if (this.lights.Count > 0)
-                {
-                    this.SelectedLight = this.lights[0];
-                }
-                else
-                {
-                    this.SelectedLight = null;
-                }
+                this.SelectedLight = this.lights.Count > 0 ? this.lights[0] : null;
             }
-
-            this.RaisePropertyChanged();
         }
     }
 }
