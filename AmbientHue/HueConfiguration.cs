@@ -1,5 +1,6 @@
 ﻿namespace AmbientHue
 {
+    using System;
     using System.Configuration;
 
     public class HueConfiguration : IHueConfiguration
@@ -41,6 +42,25 @@
             {
                 this.Save("LightName", value);
                 ConfigurationManager.AppSettings["LightName"] = value;
+            }
+        }
+
+        public CaptureMethod CaptureMethod
+        {
+            get
+            {
+                string captureMethod = ConfigurationManager.AppSettings["CaptureMethod"];
+                if (string.IsNullOrEmpty(captureMethod))
+                {
+                    return CaptureMethod.Average;
+                }
+
+                return (CaptureMethod)Enum.Parse(typeof(CaptureMethod), captureMethod);
+            }
+            set
+            {
+                this.Save("CaptureMethod", value.ToString());
+                ConfigurationManager.AppSettings["CaptureMethod"] = value.ToString();
             }
         }
 

@@ -15,5 +15,7 @@
         <Button x:Name="btnRegister" Content="Register" HorizontalAlignment="Left" Margin="211,99,0,0" VerticalAlignment="Top" Width="75" Command="{Binding RegisterCommand}"/>
         <Label x:Name="lblLight" Content="Light" HorizontalAlignment="Left" Margin="33,135,0,0" VerticalAlignment="Top"/>
         <ComboBox x:Name="cmbLight" HorizontalAlignment="Left" Margin="86,138,0,0" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Lights}" SelectedItem="{Binding SelectedLight}" />
+        <Label x:Name="lblCaptureMethod" Content="Capture method" HorizontalAlignment="Left" Margin="33,165,0,0" VerticalAlignment="Top"/>
+        <ComboBox x:Name="cmbCaptureMethod" HorizontalAlignment="Left" Margin="146,168,0,0" VerticalAlignment="Top" Width="120" ItemsSource="{Binding CaptureMethods}" SelectedItem="{Binding SelectedCaptureMethod}" />
     </Grid>
 </Window>

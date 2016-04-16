@@ -75,6 +75,25 @@ namespace AmbientHue.ViewModel
             }
         }
 
+        private readonly ObservableCollection<string> captureMethods = new ObservableCollection<string>();
+        public ObservableCollection<string> CaptureMethods => this.captureMethods;
+
+        private string selectedCaptureMethod;
+        public string SelectedCaptureMethod
+        {
+            get
+            {
+                return this.selectedCaptureMethod;
+            }
+            set
+            {
+                this.hueConfiguration.CaptureMethod = (CaptureMethod)Enum.Parse(typeof(CaptureMethod), value);
+                this.selectedCaptureMethod = value;
+
+                this.RaisePropertyChanged(() => this.SelectedCaptureMethod);
+            }
+        }
+
         public ConfigurationViewModel(IHueConfiguration hueConfiguration)
         {
             this.hueConfiguration = hueConfiguration;
@@ -134,8 +153,13 @@ namespace AmbientHue.ViewModel
                             }
 
                             this.LoadLights();
-                    },
+                        },
                     () => string.IsNullOrEmpty(this.selectedBridge) == false && string.IsNullOrEmpty(this.appKey));
+
+            Enum.GetNames(typeof(CaptureMethod))
+                .ToList().ForEach(cm => this.captureMethods.Add(cm));
+
+            this.selectedCaptureMethod = this.hueConfiguration.CaptureMethod.ToString();
         }
 
         public RelayCommand LocateCommand

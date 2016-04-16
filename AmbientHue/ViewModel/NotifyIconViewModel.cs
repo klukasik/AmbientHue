@@ -81,7 +81,11 @@
             get
             {
                 return new RelayCommand(
-                    () => Application.Current.MainWindow.Close(),
+                    () =>
+                        {
+                            Application.Current.MainWindow.Hide();
+                            Application.Current.MainWindow = null;
+                        },
                     () => Application.Current.MainWindow != null
                 );
             }
