@@ -1,10 +1,11 @@
-﻿using System.Windows;
-using System.Windows.Input;
-
-namespace AmbientHue
+﻿namespace AmbientHue.ViewModel
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Windows;
+    using System.Windows.Input;
+
+    using GalaSoft.MvvmLight.CommandWpf;
 
     /// <summary>
     /// Provides bindable properties and commands for the NotifyIcon. In this sample, the
@@ -13,8 +14,14 @@ namespace AmbientHue
     /// </summary>
     public class NotifyIconViewModel
     {
+        private readonly HueConfiguration hueConfiguration;
         private CancellationTokenSource cancellationToken;
         private Task captureTask;
+
+        public NotifyIconViewModel()
+        {
+            this.hueConfiguration = new HueConfiguration();
+        }
 
         /// <summary>
         /// Shows a window, if none is already open.
@@ -23,15 +30,14 @@ namespace AmbientHue
         {
             get
             {
-                return new DelegateCommand
-                {
-                    CanExecuteFunc = () => Application.Current.MainWindow == null,
-                    CommandAction = () =>
+                return new RelayCommand(
+                    () =>
                     {
-                        Application.Current.MainWindow = new MainWindow();
+                        Application.Current.MainWindow = new ConfigurationWindow();
                         Application.Current.MainWindow.Show();
-                    }
-                };
+                    },
+                    () => Application.Current.MainWindow == null
+                );
             }
         }
 
@@ -39,16 +45,15 @@ namespace AmbientHue
         {
             get
             {
-                return new DelegateCommand
-                {
-                    CommandAction = () =>
+                return new RelayCommand(
+                    () =>
                         {
                             this.cancellationToken = new CancellationTokenSource();
-                            this.captureTask = new Task(() => MainWindow.StartCapture(this.cancellationToken));
+                            this.captureTask = new Task(() => new AmbientCapture().StartCapture(this.hueConfiguration, this.cancellationToken));
                             this.captureTask.Start();
                         },
-                    CanExecuteFunc = () => this.captureTask == null
-                };
+                    () => this.captureTask == null && this.hueConfiguration.IsCapturePossible
+                );
             }
         }
 
@@ -56,16 +61,15 @@ namespace AmbientHue
         {
             get
             {
-                return new DelegateCommand
-                {
-                    CommandAction = () =>
+                return new RelayCommand(
+                    () =>
                         {
                             this.cancellationToken.Cancel();
                             this.cancellationToken = null;
                             this.captureTask = null;
                         },
-                    CanExecuteFunc = () => this.captureTask != null
-                };
+                    () => this.captureTask != null
+                );
             }
         }
 
@@ -76,11 +80,10 @@ namespace AmbientHue
         {
             get
             {
-                return new DelegateCommand
-                {
-                    CommandAction = () => Application.Current.MainWindow.Close(),
-                    CanExecuteFunc = () => Application.Current.MainWindow != null
-                };
+                return new RelayCommand(
+                    () => Application.Current.MainWindow.Close(),
+                    () => Application.Current.MainWindow != null
+                );
             }
         }
 
@@ -92,7 +95,7 @@ namespace AmbientHue
         {
             get
             {
-                return new DelegateCommand { CommandAction = () => Application.Current.Shutdown() };
+                return new RelayCommand(() => Application.Current.Shutdown());
             }
         }
     }

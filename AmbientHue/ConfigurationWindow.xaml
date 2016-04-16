@@ -1,0 +1,19 @@
+﻿<Window x:Class="AmbientHue.ConfigurationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AmbientHue"
+        mc:Ignorable="d"
+        Title="Ambient Hue Configuration" Height="350" Width="525">
+    <Grid>
+        <Label x:Name="lblBridge" Content="Bridge" HorizontalAlignment="Left" Margin="33,31,0,0" VerticalAlignment="Top"/>
+        <ComboBox x:Name="cmbBridge" HorizontalAlignment="Left" Margin="86,34,0,0" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Path=Bridges}" SelectedItem="{Binding SelectedBridge}" />
+        <Button x:Name="btnLocate" Content="Locate" HorizontalAlignment="Left" Margin="211,37,0,0" VerticalAlignment="Top" Width="75" Command="{Binding LocateCommand}"/>
+        <Label x:Name="lblAppKey" Content="App key" HorizontalAlignment="Left" Margin="33,71,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lblAppKeyValue" Content="{Binding AppKey}" HorizontalAlignment="Left" Margin="86,71,0,0" VerticalAlignment="Top" />
+        <Button x:Name="btnRegister" Content="Register" HorizontalAlignment="Left" Margin="211,99,0,0" VerticalAlignment="Top" Width="75" Command="{Binding RegisterCommand}"/>
+        <Label x:Name="lblLight" Content="Light" HorizontalAlignment="Left" Margin="33,135,0,0" VerticalAlignment="Top"/>
+        <ComboBox x:Name="cmbLight" HorizontalAlignment="Left" Margin="86,138,0,0" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Lights}" SelectedItem="{Binding SelectedLight}" />
+    </Grid>
+</Window>

@@ -1,8 +1,5 @@
-﻿using System.Windows;
-
-namespace AmbientHue
+﻿namespace AmbientHue
 {
-    using System;
     using System.Drawing;
     using System.Drawing.Imaging;
     using System.Linq;
@@ -11,52 +8,16 @@ namespace AmbientHue
 
     using Q42.HueApi;
     using Q42.HueApi.Interfaces;
-    using Q42.HueApi.NET;
 
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+    public class AmbientCapture
     {
-        public MainWindow()
+        public async void StartCapture(IHueConfiguration hueConfiguration, CancellationTokenSource cancellationToken)
         {
-            InitializeComponent();
-        }
-
-        private async void btnLocate_Click(object sender, RoutedEventArgs e)
-        {
-            this.cmbBridge.Items.Clear();
-
-            IBridgeLocator locator = new SSDPBridgeLocator();
-            var bridges = await locator.LocateBridgesAsync(TimeSpan.FromSeconds(30));
-            bridges.ToList().ForEach(bridge => this.cmbBridge.Items.Add(bridge));
-
-            if (this.cmbBridge.Items.Count > 0)
-            {
-                this.cmbBridge.SelectedIndex = 0;
-            }
-        }
-
-        private static async void Register()
-        {
-            ILocalHueClient client = new LocalHueClient("192.168.1.8");
-            var appKey = await client.RegisterAsync("mypersonalappname", "mydevicename");
-
-            Console.WriteLine(appKey);
-        }
-
-        public static async void StartCapture(CancellationTokenSource cancellationToken)
-        {
-            ILocalHueClient client = new LocalHueClient("192.168.1.8:80");
-            string appKey = "";
-            client.Initialize(appKey);
+            ILocalHueClient client = new LocalHueClient(hueConfiguration.IP);
+            client.Initialize(hueConfiguration.AppKey);
 
             var lights = await client.GetLightsAsync();
-            string lightId = lights.First(l => l.Name == "Iris").Id;
-
-            var turnOffCommand = new LightCommand();
-            turnOffCommand.TurnOff();
-            await client.SendCommandAsync(turnOffCommand);
+            string lightId = lights.First(l => l.Name == hueConfiguration.LightName).Id;
 
             Rectangle bounds = Screen.GetBounds(Point.Empty);
             using (Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height))
@@ -121,8 +82,6 @@ namespace AmbientHue
 
             command.Brightness = 255;
             command.SetColor((int)r, (int)g, (int)b);
-
-            Console.WriteLine("{0} {1} {2}", (int)r, (int)g, (int)b);
 
             return command;
         }
