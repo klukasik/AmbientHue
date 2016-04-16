@@ -12,6 +12,7 @@
             }
             set
             {
+                this.Save("IP", value);
                 ConfigurationManager.AppSettings["IP"] = value;
             }
         }
@@ -24,6 +25,7 @@
             }
             set
             {
+                this.Save("AppKey", value);
                 ConfigurationManager.AppSettings["AppKey"] = value;
             }
 
@@ -37,11 +39,21 @@
             }
             set
             {
+                this.Save("LightName", value);
                 ConfigurationManager.AppSettings["LightName"] = value;
             }
         }
 
         public bool IsCapturePossible => string.IsNullOrEmpty(this.IP) == false && string.IsNullOrEmpty(this.AppKey) == false
                                          && string.IsNullOrEmpty(this.LightName) == false;
+
+        private void Save(string key, string value)
+        {
+            var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            config.AppSettings.Settings[key].Value = value;
+            config.Save(ConfigurationSaveMode.Modified);
+
+            ConfigurationManager.RefreshSection("appSettings");
+        }
     }
 }
