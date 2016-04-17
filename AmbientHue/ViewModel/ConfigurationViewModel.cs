@@ -4,6 +4,9 @@ namespace AmbientHue.ViewModel
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Threading;
+    using System.Windows;
+    using System.Windows.Input;
+    using System.Windows.Media;
 
     using GalaSoft.MvvmLight;
     using GalaSoft.MvvmLight.Command;
@@ -12,7 +15,9 @@ namespace AmbientHue.ViewModel
     using Q42.HueApi.Interfaces;
     using Q42.HueApi.NET;
 
-    public class ConfigurationViewModel : ViewModelBase
+    using Color = System.Drawing.Color;
+
+    public class ConfigurationViewModel : ViewModelBase, IConfigurationViewModel
     {
         private readonly IHueConfiguration hueConfiguration;
 
@@ -94,6 +99,20 @@ namespace AmbientHue.ViewModel
             }
         }
 
+        private SolidColorBrush background = new SolidColorBrush();
+        public SolidColorBrush Background
+        {
+            get
+            {
+                return this.background;
+            }
+            set
+            {
+                this.background = value;
+                this.RaisePropertyChanged(() => this.Background);
+            }
+        }
+
         public ConfigurationViewModel(IHueConfiguration hueConfiguration)
         {
             this.hueConfiguration = hueConfiguration;
@@ -160,6 +179,8 @@ namespace AmbientHue.ViewModel
                 .ToList().ForEach(cm => this.captureMethods.Add(cm));
 
             this.selectedCaptureMethod = this.hueConfiguration.CaptureMethod.ToString();
+
+            this.Color = Color.Blue;
         }
 
         public RelayCommand LocateCommand
@@ -168,6 +189,28 @@ namespace AmbientHue.ViewModel
         }
 
         public RelayCommand RegisterCommand { get; set; }
+
+        public Color Color
+        {
+            set
+            {
+                this.Background = new SolidColorBrush(System.Windows.Media.Color.FromRgb(value.R, value.G, value.B));
+            }
+        }
+
+        public ICommand HideWindowCommand
+        {
+            get
+            {
+                return new GalaSoft.MvvmLight.CommandWpf.RelayCommand(
+                    () =>
+                    {
+                        Application.Current.MainWindow.Hide();
+                        Application.Current.MainWindow = null;
+                    }
+                );
+            }
+        }
 
         private async void LoadLights()
         {

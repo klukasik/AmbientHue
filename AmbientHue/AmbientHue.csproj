@@ -121,6 +121,7 @@
     <Compile Include="AmbientCapture.cs" />
     <Compile Include="CaptureMethod.cs" />
     <Compile Include="HueConfiguration.cs" />
+    <Compile Include="IConfigurationViewModel.cs" />
     <Compile Include="IHueConfiguration.cs" />
     <Compile Include="ViewModel\ConfigurationViewModel.cs" />
     <Compile Include="Properties\Settings.Designer.cs">

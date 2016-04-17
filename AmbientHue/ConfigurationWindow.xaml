@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         DataContext="{Binding Configuration, Source={StaticResource Locator}}"
-        Title="Ambient Hue Configuration" Height="350" Width="525">
+        Title="Ambient Hue Configuration" Height="243.964" Width="434.909" ResizeMode="CanMinimize">
     <Grid>
         <Label x:Name="lblBridge" Content="Bridge" HorizontalAlignment="Left" Margin="33,31,0,0" VerticalAlignment="Top"/>
         <ComboBox x:Name="cmbBridge" HorizontalAlignment="Left" Margin="86,34,0,0" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Path=Bridges}" SelectedItem="{Binding SelectedBridge}" />
@@ -17,5 +17,7 @@
         <ComboBox x:Name="cmbLight" HorizontalAlignment="Left" Margin="86,138,0,0" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Lights}" SelectedItem="{Binding SelectedLight}" />
         <Label x:Name="lblCaptureMethod" Content="Capture method" HorizontalAlignment="Left" Margin="33,165,0,0" VerticalAlignment="Top"/>
         <ComboBox x:Name="cmbCaptureMethod" HorizontalAlignment="Left" Margin="146,168,0,0" VerticalAlignment="Top" Width="120" ItemsSource="{Binding CaptureMethods}" SelectedItem="{Binding SelectedCaptureMethod}" />
+        <Label x:Name="lblColor" Content="" HorizontalAlignment="Left" Margin="372,57,0,0" VerticalAlignment="Top" Background="{Binding Background}" Width="30" />
+        <Button x:Name="btnHide" Content="Hide Window" HorizontalAlignment="Left" Margin="281,169,0,0" VerticalAlignment="Top" Width="121" Command="{Binding HideWindowCommand}"/>
     </Grid>
 </Window>

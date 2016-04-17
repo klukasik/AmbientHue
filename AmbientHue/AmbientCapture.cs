@@ -14,7 +14,7 @@
 
     public class AmbientCapture
     {
-        public async void StartCapture(IHueConfiguration hueConfiguration, CancellationTokenSource cancellationToken)
+        public async void StartCapture(IHueConfiguration hueConfiguration, Action<Color> setColor, CancellationTokenSource cancellationToken)
         {
             ILocalHueClient client = new LocalHueClient(hueConfiguration.IP);
             client.Initialize(hueConfiguration.AppKey);
@@ -31,29 +31,36 @@
                     {
                         graphics.CopyFromScreen(Point.Empty, Point.Empty, bounds.Size);
 
-                        LightCommand command;
+                        Color color;
                         switch (hueConfiguration.CaptureMethod)
                         {
                             case CaptureMethod.Quantize:
-                                command = Quantize(bitmap, bounds);
+                                color = Quantize(bitmap, bounds);
                                 break;
 
                             case CaptureMethod.Dominant:
-                                command = CalculateDominant(bitmap, bounds);
+                                color = CalculateDominant(bitmap, bounds);
                                 break;
 
                             default:
-                                command = CalculateAverage(bitmap, bounds);
+                                color = CalculateAverage(bitmap, bounds);
                                 break;
                         }
 
+                        LightCommand command = new LightCommand();
+                        command.TurnOn();
+                        command.Brightness = (byte)((color.R + color.G + color.B) / 3);
+                        command.SetColor(color.R, color.G, color.B);
+
                         await client.SendCommandAsync(command, new[] { lightId });
+
+                        setColor(color);
                     }
                 }
             }
         }
 
-        private static unsafe LightCommand CalculateDominant(Bitmap bitmap, Rectangle bounds)
+        private static unsafe Color CalculateDominant(Bitmap bitmap, Rectangle bounds)
         {
             BitmapData srcData = null;
             const int HueRange = 360;
@@ -114,15 +121,8 @@
                 saturations[hueIndex] / hues[hueIndex],
                 brightnesses[hueIndex] / hues[hueIndex]);
 
-            var command = new LightCommand();
-            command.TurnOn();
 
-            command.Brightness = 255;
-            command.SetColor(dominantColor.R, dominantColor.G, dominantColor.B);
-
-            Console.WriteLine("{0} {1} {2}", dominantColor.R, dominantColor.G, dominantColor.B);
-
-            return command;
+            return dominantColor;
         }
 
         public static void ColorToHSV(Color color, out double hue, out double saturation, out double value)
@@ -160,23 +160,32 @@
                 return Color.FromArgb(255, v, p, q);
         }
 
-        public static LightCommand Quantize(Bitmap bitmap, Rectangle bounds)
+        public static Color Quantize(Bitmap bitmap, Rectangle bounds)
         {
             // create the color quantization algorithm
             IColorQuantizer quantizer = new MedianCutQuantizer();
             var imageQuantizer = new ColorImageQuantizer(quantizer);
-            Color[] palette = imageQuantizer.CalculatePalette(bitmap, 1);
+            const int NrOfColors = 4;
+            Color[] palette = imageQuantizer.CalculatePalette(bitmap, NrOfColors);
 
             var command = new LightCommand();
             command.TurnOn();
 
-            command.Brightness = 255;
-            command.SetColor(palette[0].R, palette[0].G, palette[0].B);
+            for (int i = 0; i < NrOfColors; i++)
+            {
+                var color = palette[i];
+                if ((color.R < 240 && color.G < 240 && color.B < 240 &&
+                     color.R > 15 && color.G > 15 && color.B > 15) ||
+                    i == NrOfColors - 1)
+                {
+                    return color;
+                }
+            }
 
-            return command;
+            return Color.Black;
         }
 
-        private static unsafe LightCommand CalculateAverage(Bitmap bitmap, Rectangle bounds)
+        private static unsafe Color CalculateAverage(Bitmap bitmap, Rectangle bounds)
         {
             BitmapData srcData = null;
             double g = 0;
@@ -220,10 +229,7 @@
             g /= nrOfPixels;
             b /= nrOfPixels;
 
-            command.Brightness = 255;
-            command.SetColor((int)r, (int)g, (int)b);
-
-            return command;
+            return Color.FromArgb(0, (int)r, (int)g, (int)b);
         }
     }
 }

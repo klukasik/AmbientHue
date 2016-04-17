@@ -29,8 +29,6 @@ namespace AmbientHue.ViewModel
         /// </summary>
         public ViewModelLocator()
         {
-            ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
-
             ////if (ViewModelBase.IsInDesignModeStatic)
             ////{
             ////    // Create design time view services and models
@@ -40,11 +38,7 @@ namespace AmbientHue.ViewModel
             ////{
             ////    // Create run time view services and models
             ////    SimpleIoc.Default.Register<IDataService, DataService>();
-            ////}
-
-            SimpleIoc.Default.Register<IHueConfiguration, HueConfiguration>();
-            SimpleIoc.Default.Register<ConfigurationViewModel>();
-            SimpleIoc.Default.Register<NotifyIconViewModel>();
+            ////}            
         }
 
         public ConfigurationViewModel Configuration => ServiceLocator.Current.GetInstance<ConfigurationViewModel>();

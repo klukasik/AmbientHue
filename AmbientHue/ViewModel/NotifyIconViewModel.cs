@@ -7,6 +7,8 @@
 
     using GalaSoft.MvvmLight.CommandWpf;
 
+    using Microsoft.Practices.ServiceLocation;
+
     /// <summary>
     /// Provides bindable properties and commands for the NotifyIcon. In this sample, the
     /// view model is assigned to the NotifyIcon in XAML. Alternatively, the startup routing
@@ -18,9 +20,12 @@
         private CancellationTokenSource cancellationToken;
         private Task captureTask;
 
+        private readonly ConfigurationViewModel configurationViewModel;
+
         public NotifyIconViewModel()
         {
             this.hueConfiguration = new HueConfiguration();
+            this.configurationViewModel = ServiceLocator.Current.GetInstance<ConfigurationViewModel>();
         }
 
         /// <summary>
@@ -49,7 +54,15 @@
                     () =>
                         {
                             this.cancellationToken = new CancellationTokenSource();
-                            this.captureTask = new Task(() => new AmbientCapture().StartCapture(this.hueConfiguration, this.cancellationToken));
+                            var uiContext = TaskScheduler.FromCurrentSynchronizationContext();
+                            this.captureTask = new Task(() => new AmbientCapture().StartCapture(this.hueConfiguration,
+                                color =>
+                                    {
+                                        Task.Factory.StartNew(() =>
+                                        {
+                                            this.configurationViewModel.Color = color;
+                                        }, CancellationToken.None, TaskCreationOptions.None, uiContext);
+                                    }, this.cancellationToken));
                             this.captureTask.Start();
                         },
                     () => this.captureTask == null && this.hueConfiguration.IsCapturePossible
