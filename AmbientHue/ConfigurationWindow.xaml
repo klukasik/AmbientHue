@@ -18,6 +18,7 @@
         <Label x:Name="lblCaptureMethod" Content="Capture method" HorizontalAlignment="Left" Margin="33,165,0,0" VerticalAlignment="Top"/>
         <ComboBox x:Name="cmbCaptureMethod" HorizontalAlignment="Left" Margin="146,168,0,0" VerticalAlignment="Top" Width="120" ItemsSource="{Binding CaptureMethods}" SelectedItem="{Binding SelectedCaptureMethod}" />
         <Label x:Name="lblColor" Content="" HorizontalAlignment="Left" Margin="372,57,0,0" VerticalAlignment="Top" Background="{Binding Background}" Width="30" />
+        <Label x:Name="lblElapsecMsec" Content="{Binding ElapsedMsec}" HorizontalAlignment="Left" Margin="342,97,0,0" VerticalAlignment="Top" />
         <Button x:Name="btnHide" Content="Hide Window" HorizontalAlignment="Left" Margin="281,169,0,0" VerticalAlignment="Top" Width="121" Command="{Binding HideWindowCommand}"/>
     </Grid>
 </Window>

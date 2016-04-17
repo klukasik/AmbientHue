@@ -212,6 +212,20 @@ namespace AmbientHue.ViewModel
             }
         }
 
+        private string elapsedMsec;
+        public string ElapsedMsec
+        {
+            get
+            {
+                return this.elapsedMsec;
+            }
+            set
+            {
+                this.elapsedMsec = value;
+                this.RaisePropertyChanged(() => this.ElapsedMsec);
+            }
+        }
+
         private async void LoadLights()
         {
             this.lights.Clear();

@@ -14,7 +14,7 @@
 
     public class AmbientCapture
     {
-        public async void StartCapture(IHueConfiguration hueConfiguration, Action<Color> setColor, CancellationTokenSource cancellationToken)
+        public async void StartCapture(IHueConfiguration hueConfiguration, Action<Color, long> setStatusAction, CancellationTokenSource cancellationToken)
         {
             ILocalHueClient client = new LocalHueClient(hueConfiguration.IP);
             client.Initialize(hueConfiguration.AppKey);
@@ -29,6 +29,7 @@
                 {
                     while (cancellationToken.IsCancellationRequested == false)
                     {
+                        var watch = System.Diagnostics.Stopwatch.StartNew();
                         graphics.CopyFromScreen(Point.Empty, Point.Empty, bounds.Size);
 
                         Color color;
@@ -54,7 +55,11 @@
 
                         await client.SendCommandAsync(command, new[] { lightId });
 
-                        setColor(color);
+                        // the code that you want to measure comes here
+                        watch.Stop();
+                        var elapsedMs = watch.ElapsedMilliseconds;
+
+                        setStatusAction(color, elapsedMs);
                     }
                 }
             }

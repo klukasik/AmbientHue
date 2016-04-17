@@ -56,11 +56,12 @@
                             this.cancellationToken = new CancellationTokenSource();
                             var uiContext = TaskScheduler.FromCurrentSynchronizationContext();
                             this.captureTask = new Task(() => new AmbientCapture().StartCapture(this.hueConfiguration,
-                                color =>
+                                (color, elapsedMsec) =>
                                     {
                                         Task.Factory.StartNew(() =>
                                         {
                                             this.configurationViewModel.Color = color;
+                                            this.configurationViewModel.ElapsedMsec = $"{elapsedMsec} msec";
                                         }, CancellationToken.None, TaskCreationOptions.None, uiContext);
                                     }, this.cancellationToken));
                             this.captureTask.Start();
