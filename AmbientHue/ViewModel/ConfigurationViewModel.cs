@@ -4,6 +4,7 @@ namespace AmbientHue.ViewModel
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Threading;
+    using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Input;
     using System.Windows.Media;
@@ -37,6 +38,10 @@ namespace AmbientHue.ViewModel
             {
                 this.hueConfiguration.IP = value;
                 this.selectedBridge = value;
+
+                this.AppKey = null;
+                this.Lights.Clear();
+                this.SelectedLight = null;
 
                 this.RaisePropertyChanged(() => this.SelectedBridge);
                 this.RegisterCommand.RaiseCanExecuteChanged();
@@ -113,6 +118,8 @@ namespace AmbientHue.ViewModel
             }
         }
 
+        private Task locateTask;
+
         public ConfigurationViewModel(IHueConfiguration hueConfiguration)
         {
             this.hueConfiguration = hueConfiguration;
@@ -136,39 +143,61 @@ namespace AmbientHue.ViewModel
             this.selectedLight = defaultLightName;
 
             this.LocateCommand = new RelayCommand(
-                    async () =>
+                    () =>
                     {
                         this.bridges.Clear();
 
-                        IBridgeLocator locator = new SSDPBridgeLocator();
-                        (await locator.LocateBridgesAsync(TimeSpan.FromSeconds(1))).ToList()
-                            .ForEach(bridge => this.bridges.Add(bridge));
+                        var uiContext = TaskScheduler.FromCurrentSynchronizationContext();
+                        this.locateTask = new Task(
+                            async () =>
+                                {
+                                    IBridgeLocator locator = new SSDPBridgeLocator();
+                                    var newBridges = (await locator.LocateBridgesAsync(TimeSpan.FromSeconds(1))).ToList();
 
-                        if (this.bridges.Contains(this.SelectedBridge) == false)
-                        {
-                            this.SelectedBridge = this.bridges.Count > 0 ? this.bridges[0] : null;
-                        }
-                    });
+                                    await Task.Factory.StartNew(() =>
+                                    {
+                                        newBridges.ForEach(bridge => this.bridges.Add(bridge));
+
+                                        if (this.bridges.Contains(this.SelectedBridge) == false)
+                                        {
+                                            this.SelectedBridge = this.bridges.Count > 0 ? this.bridges[0] : null;
+                                        }
+
+                                        this.locateTask = null;
+                                        this.LocateCommand.RaiseCanExecuteChanged();
+                                    }, CancellationToken.None, TaskCreationOptions.None, uiContext);
+                                });
+
+                        this.locateTask.Start();
+                        this.LocateCommand.RaiseCanExecuteChanged();
+                    }, () => this.locateTask == null);
 
             this.RegisterCommand = new RelayCommand(
                     async () =>
                         {
-
-
-                            int nrOfTries = 1;
-                            while (nrOfTries < 30)
+                            try
                             {
-                                try
+                                this.ShowRegisterMessage = Visibility.Visible;
+
+                                int nrOfTries = 1;
+                                while (nrOfTries < 30)
                                 {
-                                    ILocalHueClient client = new LocalHueClient(this.selectedBridge);
-                                    this.AppKey = await client.RegisterAsync("AmbientHue", "v0.1");
-                                    break;
+                                    try
+                                    {
+                                        ILocalHueClient client = new LocalHueClient(this.selectedBridge);
+                                        this.AppKey = await client.RegisterAsync("AmbientHue", "v0.1");
+                                        break;
+                                    }
+                                    catch (Exception)
+                                    {
+                                        nrOfTries++;
+                                        Thread.Sleep(500);
+                                    }
                                 }
-                                catch (Exception)
-                                {
-                                    nrOfTries++;
-                                    Thread.Sleep(500);
-                                }
+                            }
+                            finally
+                            {
+                                this.ShowRegisterMessage = Visibility.Hidden;
                             }
 
                             this.LoadLights();
@@ -213,6 +242,7 @@ namespace AmbientHue.ViewModel
         }
 
         private string elapsedMsec;
+
         public string ElapsedMsec
         {
             get
@@ -223,6 +253,20 @@ namespace AmbientHue.ViewModel
             {
                 this.elapsedMsec = value;
                 this.RaisePropertyChanged(() => this.ElapsedMsec);
+            }
+        }
+
+        private Visibility showRegisterMessage = Visibility.Hidden;
+        public Visibility ShowRegisterMessage
+        {
+            get
+            {
+                return this.showRegisterMessage;
+            }
+            set
+            {
+                this.showRegisterMessage = value;
+                this.RaisePropertyChanged(() => this.ShowRegisterMessage);
             }
         }
 

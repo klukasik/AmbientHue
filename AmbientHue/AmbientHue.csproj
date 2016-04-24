@@ -119,6 +119,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AmbientCapture.cs" />
+    <Compile Include="CaptureColor\CaptureAverage.cs" />
+    <Compile Include="CaptureColor\CaptureDominant.cs" />
+    <Compile Include="CaptureColor\ICaptureColor.cs" />
+    <Compile Include="CaptureColor\ProminentColor.cs" />
+    <Compile Include="CaptureColor\Quantize.cs" />
     <Compile Include="CaptureMethod.cs" />
     <Compile Include="HueConfiguration.cs" />
     <Compile Include="IConfigurationViewModel.cs" />

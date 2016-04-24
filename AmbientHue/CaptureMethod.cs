@@ -4,6 +4,7 @@
     {
         Average,
         Quantize,
-        Dominant
+        Dominant,
+        Prominent
     }
 }

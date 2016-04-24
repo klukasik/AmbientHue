@@ -11,6 +11,7 @@
         <ComboBox x:Name="cmbBridge" HorizontalAlignment="Left" Margin="86,34,0,0" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Path=Bridges}" SelectedItem="{Binding SelectedBridge}" />
         <Button x:Name="btnLocate" Content="Locate" HorizontalAlignment="Left" Margin="211,37,0,0" VerticalAlignment="Top" Width="75" Command="{Binding LocateCommand}"/>
         <Label x:Name="lblAppKey" Content="App key" HorizontalAlignment="Left" Margin="33,71,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lblRegisterMessage" Content="Press button on the bridge..." HorizontalAlignment="Left" Margin="33,101,0,0" VerticalAlignment="Top" Visibility="{Binding ShowRegisterMessage}"/>
         <Label x:Name="lblAppKeyValue" Content="{Binding AppKey}" HorizontalAlignment="Left" Margin="86,71,0,0" VerticalAlignment="Top" />
         <Button x:Name="btnRegister" Content="Register" HorizontalAlignment="Left" Margin="211,99,0,0" VerticalAlignment="Top" Width="75" Command="{Binding RegisterCommand}"/>
         <Label x:Name="lblLight" Content="Light" HorizontalAlignment="Left" Margin="33,135,0,0" VerticalAlignment="Top"/>
