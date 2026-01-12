@@ -1,20 +1,5 @@
-/*
-  In App.xaml:
-  <Application.Resources>
-      <vm:ViewModelLocator xmlns:vm="clr-namespace:AmbientHue"
-                           x:Key="Locator" />
-  </Application.Resources>
-  
-  In the View:
-  DataContext="{Binding Source={StaticResource Locator}, Path=ViewModelName}"
-
-  You can also use Blend to do all this with the tool's support.
-  See http://www.galasoft.ch/mvvm
-*/
-
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.Ioc;
-using Microsoft.Practices.ServiceLocation;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AmbientHue.ViewModel
 {
@@ -41,9 +26,9 @@ namespace AmbientHue.ViewModel
             ////}            
         }
 
-        public ConfigurationViewModel Configuration => ServiceLocator.Current.GetInstance<ConfigurationViewModel>();
+        public ConfigurationViewModel Configuration => Ioc.Default.GetService<ConfigurationViewModel>();
 
-        public NotifyIconViewModel NotifyIcon => ServiceLocator.Current.GetInstance<NotifyIconViewModel>();
+        public NotifyIconViewModel NotifyIcon => Ioc.Default.GetService<NotifyIconViewModel>();
 
         public static void Cleanup()
         {

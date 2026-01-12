@@ -5,9 +5,8 @@
     using System.Windows;
     using System.Windows.Input;
 
-    using GalaSoft.MvvmLight.CommandWpf;
-
-    using Microsoft.Practices.ServiceLocation;
+    using CommunityToolkit.Mvvm.Input;
+    using CommunityToolkit.Mvvm.DependencyInjection;
 
     /// <summary>
     /// Provides bindable properties and commands for the NotifyIcon. In this sample, the
@@ -25,7 +24,7 @@
         public NotifyIconViewModel()
         {
             this.hueConfiguration = new HueConfiguration();
-            this.configurationViewModel = ServiceLocator.Current.GetInstance<ConfigurationViewModel>();
+            this.configurationViewModel = Ioc.Default.GetService<ConfigurationViewModel>();
         }
 
         /// <summary>
