@@ -14,6 +14,8 @@ namespace AmbientHue
     /// </summary>
     public partial class ConfigurationWindow : Window
     {
+        private static readonly Regex NumericRegex = new Regex("[^0-9]+");
+
         public ConfigurationWindow()
         {
             InitializeComponent();
@@ -25,8 +27,7 @@ namespace AmbientHue
         private void txtFrameDelay_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             // Only allow digits
-            Regex regex = new Regex("[^0-9]+");
-            e.Handled = regex.IsMatch(e.Text);
+            e.Handled = NumericRegex.IsMatch(e.Text);
         }
     }
 }

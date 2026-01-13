@@ -32,14 +32,14 @@
             
             // Validate screen index and fallback to primary screen if invalid
             Screen selectedScreen;
-            if (screenIndex < 0 || screenIndex >= allScreens.Length)
+            if (screenIndex >= 0 && screenIndex < allScreens.Length)
             {
-                // Find the primary screen explicitly
-                selectedScreen = allScreens.FirstOrDefault(s => s.Primary) ?? allScreens[0];
+                selectedScreen = allScreens[screenIndex];
             }
             else
             {
-                selectedScreen = allScreens[screenIndex];
+                // Use the system's primary screen as fallback
+                selectedScreen = Screen.PrimaryScreen;
             }
             
             Rectangle bounds = selectedScreen.Bounds;
