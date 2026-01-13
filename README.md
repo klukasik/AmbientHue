@@ -18,7 +18,7 @@ A Windows application that dynamically adapts the color of Philips Hue lamps to 
 ## Requirements
 
 - **Operating System**: Windows (WPF application)
-- **Runtime**: .NET Framework 4.5.2 or higher
+- **Runtime**: .NET 8.0 or higher
 - **Hardware**: Philips Hue Bridge and at least one Philips Hue lamp
 - **Network**: Local network connection to Philips Hue Bridge
 
@@ -53,9 +53,9 @@ The application will now continuously adapt your selected Hue lamp's color to ma
 
 ### Prerequisites
 
-- Visual Studio 2015 or later
-- .NET Framework 4.5.2 SDK
-- NuGet package manager
+- Visual Studio 2022 or later (or any IDE with .NET 8.0 support)
+- .NET 8.0 SDK or later
+- NuGet package manager (integrated in modern IDEs)
 
 ### Build Steps
 
@@ -65,23 +65,20 @@ The application will now continuously adapt your selected Hue lamp's color to ma
    cd AmbientHue
    ```
 
-2. Restore NuGet packages:
+2. Restore and build the solution:
    ```bash
-   nuget restore AmbientHue/AmbientHue.sln
+   # Using .NET CLI (recommended)
+   cd AmbientHue
+   dotnet restore
+   dotnet build --configuration Release
+   
+   # Or using MSBuild
+   msbuild AmbientHue.sln /p:Configuration=Release
    ```
 
-3. Build the solution:
-   ```bash
-   # Debug build
-   msbuild AmbientHue/AmbientHue.sln /p:Configuration=Debug
-
-   # Release build
-   msbuild AmbientHue/AmbientHue.sln /p:Configuration=Release
-   ```
-
-4. The compiled executable will be located in:
-   - Debug: `AmbientHue/bin/Debug/AmbientHue.exe`
-   - Release: `AmbientHue/bin/Release/AmbientHue.exe`
+3. The compiled executable will be located in:
+   - Debug: `AmbientHue/bin/Debug/net8.0-windows/AmbientHue.exe`
+   - Release: `AmbientHue/bin/Release/net8.0-windows/AmbientHue.exe`
 
 ### Using Visual Studio
 
@@ -92,15 +89,17 @@ The application will now continuously adapt your selected Hue lamp's color to ma
 
 ## Technology Stack
 
-- **Framework**: .NET Framework 4.5.2
+- **Framework**: .NET 8.0 (LTS)
 - **UI**: WPF (Windows Presentation Foundation)
 - **Architecture**: MVVM (Model-View-ViewModel) pattern
 - **Key Libraries**:
-  - [Q42.HueApi](https://github.com/Q42/Q42.HueApi) - Philips Hue API integration
-  - [AForge.NET](http://www.aforgenet.com/) - Image processing and computer vision
-  - [MvvmLight](http://www.mvvmlight.net/) - MVVM framework
-  - [Hardcodet.NotifyIcon.Wpf](https://github.com/hardcodet/wpf-notifyicon) - System tray icon support
-  - [Newtonsoft.Json](https://www.newtonsoft.com/json) - JSON serialization
+  - [Q42.HueApi](https://github.com/Q42/Q42.HueApi) v3.24.0 - Philips Hue API integration
+  - [Q42.HueApi.ColorConverters](https://github.com/Q42/Q42.HueApi) v3.23.2 - Color conversion utilities
+  - [AForge.NET](http://www.aforgenet.com/) v2.2.5 - Image processing and computer vision
+  - [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) v8.3.2 - Modern MVVM framework
+  - [Microsoft.Extensions.DependencyInjection](https://docs.microsoft.com/en-us/dotnet/core/extensions/dependency-injection) v8.0.1 - Dependency injection
+  - [Hardcodet.NotifyIcon.Wpf](https://github.com/hardcodet/wpf-notifyicon) v1.1.0 - System tray icon support
+  - [Newtonsoft.Json](https://www.newtonsoft.com/json) v13.0.4 - JSON serialization
 
 ## Project Structure
 
