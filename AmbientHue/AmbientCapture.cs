@@ -4,6 +4,7 @@
     using System.Drawing;
     using System.Linq;
     using System.Threading;
+    using System.Threading.Tasks;
     using System.Windows.Forms;
 
     using AmbientHue.CaptureColor;
@@ -29,8 +30,9 @@
             Rectangle bounds = Screen.GetBounds(Point.Empty);
             
             // Create downsampled bitmap for faster processing
-            int downsampledWidth = bounds.Width / DownsampleFactor;
-            int downsampledHeight = bounds.Height / DownsampleFactor;
+            // Ensure minimum dimensions of 1x1
+            int downsampledWidth = Math.Max(1, bounds.Width / DownsampleFactor);
+            int downsampledHeight = Math.Max(1, bounds.Height / DownsampleFactor);
             Rectangle downsampledBounds = new Rectangle(0, 0, downsampledWidth, downsampledHeight);
             
             using (Bitmap fullBitmap = new Bitmap(bounds.Width, bounds.Height))
@@ -73,7 +75,7 @@
                         int delayMs = Math.Max(0, DefaultFrameDelayMs - (int)elapsedMs);
                         if (delayMs > 0)
                         {
-                            await System.Threading.Tasks.Task.Delay(delayMs, cancellationToken.Token);
+                            await Task.Delay(delayMs, cancellationToken.Token);
                         }
                     }
                 }
