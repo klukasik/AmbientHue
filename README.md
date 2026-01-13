@@ -5,15 +5,19 @@ A Windows application that dynamically adapts the color of Philips Hue lamps to 
 ## Features
 
 - **Real-time Screen Color Capture**: Continuously monitors your screen and extracts color information
+- **Optimized Performance**: Intelligent downsampling and frame rate limiting for minimal CPU/GPU usage
 - **Multiple Color Capture Methods**:
-  - **Average**: Simple average of all screen pixels
-  - **Quantize**: Color quantization algorithm
+  - **Average**: Simple average of all screen pixels (classic method)
+  - **Grid Sampling**: Fast method that samples pixels at regular intervals (recommended for performance)
+  - **Center Weighted**: Emphasizes center of screen where content is typically focused
+  - **Edge Sampling**: Samples screen periphery for ambient edge lighting effect
+  - **Quantize**: Color quantization algorithm for distinct colors
   - **Dominant**: Identifies the most dominant color on screen
   - **Prominent**: Advanced color prominence detection
 - **Philips Hue Integration**: Seamless connection with Philips Hue Bridge and lamps
 - **System Tray Application**: Runs quietly in the background with minimal UI footprint
 - **Configurable Settings**: Choose which light to control and preferred color capture method
-- **Low Latency**: Optimized for smooth, responsive color transitions
+- **Low Latency**: Optimized for smooth, responsive color transitions at ~10 fps (configurable)
 
 ## Requirements
 
@@ -107,12 +111,15 @@ The application will now continuously adapt your selected Hue lamp's color to ma
 AmbientHue/
 ├── AmbientHue/              # Main application directory
 │   ├── CaptureColor/        # Color capture algorithms
-│   │   ├── CaptureAverage.cs
-│   │   ├── CaptureDominant.cs
-│   │   ├── ProminentColor.cs
-│   │   └── Quantize.cs
+│   │   ├── CaptureAverage.cs          # Average all pixels
+│   │   ├── CaptureGridSampling.cs     # Fast grid-based sampling
+│   │   ├── CaptureCenterWeighted.cs   # Center-focused sampling
+│   │   ├── CaptureEdgeSampling.cs     # Edge/periphery sampling
+│   │   ├── CaptureDominant.cs         # Dominant color detection
+│   │   ├── ProminentColor.cs          # Prominent color detection
+│   │   └── Quantize.cs                # Color quantization
 │   ├── ViewModel/           # MVVM ViewModels
-│   ├── AmbientCapture.cs    # Screen capture logic
+│   ├── AmbientCapture.cs    # Screen capture logic with optimization
 │   ├── HueConfiguration.cs  # Hue settings management
 │   └── ConfigurationWindow.xaml # Configuration UI
 └── README.md
@@ -120,10 +127,22 @@ AmbientHue/
 
 ## How It Works
 
-1. **Screen Capture**: The application captures the current screen content at regular intervals
-2. **Color Analysis**: The selected algorithm processes the screen image to determine the representative color
-3. **Color Conversion**: The RGB color is converted to the Hue lamp's color space
-4. **Lamp Update**: The color is sent to the Philips Hue Bridge, which updates the selected lamp
+1. **Screen Capture**: The application captures the current screen content at ~10 fps (configurable)
+2. **Downsampling**: Screen is downsampled 4x for faster processing without quality loss
+3. **Color Analysis**: The selected algorithm processes the downsampled image to determine the representative color
+4. **Color Conversion**: The RGB color is converted to the Hue lamp's color space
+5. **Lamp Update**: The color is sent to the Philips Hue Bridge, which updates the selected lamp
+6. **Rate Limiting**: Intelligent delays prevent CPU overload while maintaining smooth transitions
+
+## Performance Optimization
+
+The application includes several optimizations to ensure efficient operation during video playback:
+
+- **Downsampling**: Screen captured at 1/4 resolution (4x smaller) for 16x faster processing
+- **Frame Rate Limiting**: Updates capped at ~10 fps to balance responsiveness with CPU usage
+- **Efficient Sampling Methods**: New grid-based and edge sampling methods process fewer pixels
+- **Instance Reuse**: Capture method objects created once and reused to reduce allocations
+- **Async Delays**: Proper async/await patterns prevent blocking and reduce CPU load
 
 ## Contributing
 
