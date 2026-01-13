@@ -4,11 +4,10 @@ namespace AmbientHue
 {
     using AmbientHue.ViewModel;
 
-    using GalaSoft.MvvmLight.Ioc;
+    using CommunityToolkit.Mvvm.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection;
 
     using Hardcodet.Wpf.TaskbarNotification;
-
-    using Microsoft.Practices.ServiceLocation;
 
     /// <summary>
     /// Interaction logic for App.xaml
@@ -21,15 +20,15 @@ namespace AmbientHue
         {
             base.OnStartup(e);
 
-            if (ServiceLocator.IsLocationProviderSet == false)
-            {
-                ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
-
-                var hueConfiguration = new HueConfiguration();
-                SimpleIoc.Default.Register<IHueConfiguration>(() => hueConfiguration);
-                SimpleIoc.Default.Register<ConfigurationViewModel>();
-                SimpleIoc.Default.Register<NotifyIconViewModel>();
-            }
+            // Configure dependency injection
+            var services = new ServiceCollection();
+            
+            var hueConfiguration = new HueConfiguration();
+            services.AddSingleton<IHueConfiguration>(hueConfiguration);
+            services.AddSingleton<ConfigurationViewModel>();
+            services.AddSingleton<NotifyIconViewModel>();
+            
+            Ioc.Default.ConfigureServices(services.BuildServiceProvider());
 
             //create the notifyicon (it's a resource declared in NotifyIconResources.xaml
             notifyIcon = (TaskbarIcon)FindResource("NotifyIcon");

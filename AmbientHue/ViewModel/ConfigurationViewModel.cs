@@ -9,16 +9,15 @@ namespace AmbientHue.ViewModel
     using System.Windows.Input;
     using System.Windows.Media;
 
-    using GalaSoft.MvvmLight;
-    using GalaSoft.MvvmLight.Command;
+    using CommunityToolkit.Mvvm.ComponentModel;
+    using CommunityToolkit.Mvvm.Input;
 
     using Q42.HueApi;
     using Q42.HueApi.Interfaces;
-    using Q42.HueApi.NET;
 
     using Color = System.Drawing.Color;
 
-    public class ConfigurationViewModel : ViewModelBase, IConfigurationViewModel
+    public partial class ConfigurationViewModel : ObservableObject, IConfigurationViewModel
     {
         private readonly IHueConfiguration hueConfiguration;
 
@@ -43,8 +42,8 @@ namespace AmbientHue.ViewModel
                 this.Lights.Clear();
                 this.SelectedLight = null;
 
-                this.RaisePropertyChanged(() => this.SelectedBridge);
-                this.RegisterCommand.RaiseCanExecuteChanged();
+                OnPropertyChanged(nameof(SelectedBridge));
+                RegisterCommand.NotifyCanExecuteChanged();
             }
         }
 
@@ -61,8 +60,8 @@ namespace AmbientHue.ViewModel
                 this.hueConfiguration.AppKey = value;
                 this.appKey = value;
 
-                this.RaisePropertyChanged(() => this.AppKey);
-                this.RegisterCommand.RaiseCanExecuteChanged();
+                OnPropertyChanged(nameof(AppKey));
+                RegisterCommand.NotifyCanExecuteChanged();
             }
         }
 
@@ -81,7 +80,7 @@ namespace AmbientHue.ViewModel
                 this.hueConfiguration.LightName = value;
                 this.selectedLight = value;
 
-                this.RaisePropertyChanged(() => this.SelectedLight);
+                OnPropertyChanged(nameof(SelectedLight));
             }
         }
 
@@ -100,7 +99,7 @@ namespace AmbientHue.ViewModel
                 this.hueConfiguration.CaptureMethod = (CaptureMethod)Enum.Parse(typeof(CaptureMethod), value);
                 this.selectedCaptureMethod = value;
 
-                this.RaisePropertyChanged(() => this.SelectedCaptureMethod);
+                OnPropertyChanged(nameof(SelectedCaptureMethod));
             }
         }
 
@@ -114,7 +113,7 @@ namespace AmbientHue.ViewModel
             set
             {
                 this.background = value;
-                this.RaisePropertyChanged(() => this.Background);
+                OnPropertyChanged(nameof(Background));
             }
         }
 
@@ -151,8 +150,8 @@ namespace AmbientHue.ViewModel
                         this.locateTask = new Task(
                             async () =>
                                 {
-                                    IBridgeLocator locator = new SSDPBridgeLocator();
-                                    var newBridges = (await locator.LocateBridgesAsync(TimeSpan.FromSeconds(1))).ToList();
+                                    IBridgeLocator locator = new HttpBridgeLocator();
+                                    var newBridges = (await locator.LocateBridgesAsync(TimeSpan.FromSeconds(1))).Select(b => b.IpAddress).ToList();
 
                                     await Task.Factory.StartNew(() =>
                                     {
@@ -164,12 +163,12 @@ namespace AmbientHue.ViewModel
                                         }
 
                                         this.locateTask = null;
-                                        this.LocateCommand.RaiseCanExecuteChanged();
+                                        this.LocateCommand.NotifyCanExecuteChanged();
                                     }, CancellationToken.None, TaskCreationOptions.None, uiContext);
                                 });
 
                         this.locateTask.Start();
-                        this.LocateCommand.RaiseCanExecuteChanged();
+                        this.LocateCommand.NotifyCanExecuteChanged();
                     }, () => this.locateTask == null);
 
             this.RegisterCommand = new RelayCommand(
@@ -231,7 +230,7 @@ namespace AmbientHue.ViewModel
         {
             get
             {
-                return new GalaSoft.MvvmLight.CommandWpf.RelayCommand(
+                return new RelayCommand(
                     () =>
                     {
                         Application.Current.MainWindow.Hide();
@@ -252,7 +251,7 @@ namespace AmbientHue.ViewModel
             set
             {
                 this.elapsedMsec = value;
-                this.RaisePropertyChanged(() => this.ElapsedMsec);
+                OnPropertyChanged(nameof(ElapsedMsec));
             }
         }
 
@@ -266,7 +265,7 @@ namespace AmbientHue.ViewModel
             set
             {
                 this.showRegisterMessage = value;
-                this.RaisePropertyChanged(() => this.ShowRegisterMessage);
+                OnPropertyChanged(nameof(ShowRegisterMessage));
             }
         }
 

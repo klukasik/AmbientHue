@@ -9,6 +9,8 @@
     using AmbientHue.CaptureColor;
 
     using Q42.HueApi;
+    using Q42.HueApi.ColorConverters;
+    using Q42.HueApi.ColorConverters.HSB;
     using Q42.HueApi.Interfaces;
 
     public class AmbientCapture
@@ -53,10 +55,12 @@
 
                         Color color = captureColor.Capture(bitmap, bounds);
 
+                        var rgbColor = new RGBColor(color.R / 255.0, color.G / 255.0, color.B / 255.0);
+                        
                         LightCommand command = new LightCommand();
                         command.TurnOn();
                         command.Brightness = (byte)((color.R + color.G + color.B) / 3);
-                        command.SetColor(color.R, color.G, color.B);
+                        command.SetColor(rgbColor);
 
                         await client.SendCommandAsync(command, new[] { lightId });
 
