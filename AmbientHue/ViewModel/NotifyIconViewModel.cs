@@ -21,6 +21,12 @@
 
         private readonly ConfigurationViewModel configurationViewModel;
 
+        private RelayCommand showWindowCommand;
+        private RelayCommand startAmbientCaptureCommand;
+        private RelayCommand stopAmbientCaptureCommand;
+        private RelayCommand hideWindowCommand;
+        private RelayCommand exitApplicationCommand;
+
         public NotifyIconViewModel()
         {
             this.hueConfiguration = new HueConfiguration();
@@ -34,11 +40,12 @@
         {
             get
             {
-                return new RelayCommand(
+                return showWindowCommand ??= new RelayCommand(
                     () =>
                     {
                         Application.Current.MainWindow = new ConfigurationWindow();
                         Application.Current.MainWindow.Show();
+                        NotifyCommandsCanExecuteChanged();
                     },
                     () => Application.Current.MainWindow == null
                 );
@@ -49,7 +56,7 @@
         {
             get
             {
-                return new RelayCommand(
+                return startAmbientCaptureCommand ??= new RelayCommand(
                     () =>
                         {
                             this.cancellationToken = new CancellationTokenSource();
@@ -64,6 +71,7 @@
                                         }, CancellationToken.None, TaskCreationOptions.None, uiContext);
                                     }, this.cancellationToken));
                             this.captureTask.Start();
+                            NotifyCommandsCanExecuteChanged();
                         },
                     () => this.captureTask == null && this.hueConfiguration.IsCapturePossible
                 );
@@ -74,12 +82,13 @@
         {
             get
             {
-                return new RelayCommand(
+                return stopAmbientCaptureCommand ??= new RelayCommand(
                     () =>
                         {
                             this.cancellationToken.Cancel();
                             this.cancellationToken = null;
                             this.captureTask = null;
+                            NotifyCommandsCanExecuteChanged();
                         },
                     () => this.captureTask != null
                 );
@@ -93,11 +102,12 @@
         {
             get
             {
-                return new RelayCommand(
+                return hideWindowCommand ??= new RelayCommand(
                     () =>
                         {
                             Application.Current.MainWindow.Hide();
                             Application.Current.MainWindow = null;
+                            NotifyCommandsCanExecuteChanged();
                         },
                     () => Application.Current.MainWindow != null
                 );
@@ -112,8 +122,16 @@
         {
             get
             {
-                return new RelayCommand(() => Application.Current.Shutdown());
+                return exitApplicationCommand ??= new RelayCommand(() => Application.Current.Shutdown());
             }
+        }
+
+        private void NotifyCommandsCanExecuteChanged()
+        {
+            showWindowCommand?.NotifyCanExecuteChanged();
+            startAmbientCaptureCommand?.NotifyCanExecuteChanged();
+            stopAmbientCaptureCommand?.NotifyCanExecuteChanged();
+            hideWindowCommand?.NotifyCanExecuteChanged();
         }
     }
 }
