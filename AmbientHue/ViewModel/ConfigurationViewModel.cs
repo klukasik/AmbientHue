@@ -288,8 +288,8 @@ namespace AmbientHue.ViewModel
                 return new RelayCommand(
                     () =>
                     {
-                        Application.Current.MainWindow.Hide();
-                        Application.Current.MainWindow = null;
+                        System.Windows.Application.Current.MainWindow.Hide();
+                        System.Windows.Application.Current.MainWindow = null;
                     }
                 );
             }
