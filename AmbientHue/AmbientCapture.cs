@@ -31,12 +31,17 @@
             int screenIndex = hueConfiguration.SelectedScreenIndex;
             
             // Validate screen index and fallback to primary screen if invalid
+            Screen selectedScreen;
             if (screenIndex < 0 || screenIndex >= allScreens.Length)
             {
-                screenIndex = 0; // Use primary screen
+                // Find the primary screen explicitly
+                selectedScreen = allScreens.FirstOrDefault(s => s.Primary) ?? allScreens[0];
+            }
+            else
+            {
+                selectedScreen = allScreens[screenIndex];
             }
             
-            Screen selectedScreen = allScreens[screenIndex];
             Rectangle bounds = selectedScreen.Bounds;
             
             // Get configured frame delay
