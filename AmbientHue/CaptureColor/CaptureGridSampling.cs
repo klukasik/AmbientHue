@@ -23,24 +23,21 @@ namespace AmbientHue.CaptureColor
             {
                 srcData = bitmap.LockBits(bounds, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
-                unsafe
-                {
-                    byte* srcPointer = (byte*)srcData.Scan0;
-                    int stride = srcData.Stride;
+                byte* srcPointer = (byte*)srcData.Scan0;
+                int stride = srcData.Stride;
 
-                    // Sample pixels at grid intervals for much faster processing
-                    for (int i = 0; i < bounds.Height; i += SampleStride)
+                // Sample pixels at grid intervals for much faster processing
+                for (int i = 0; i < bounds.Height; i += SampleStride)
+                {
+                    byte* rowPointer = srcPointer + (i * stride);
+                    
+                    for (int j = 0; j < bounds.Width; j += SampleStride)
                     {
-                        byte* rowPointer = srcPointer + (i * stride);
-                        
-                        for (int j = 0; j < bounds.Width; j += SampleStride)
-                        {
-                            int pixelOffset = j * 4;
-                            b += rowPointer[pixelOffset];     // Blue
-                            g += rowPointer[pixelOffset + 1]; // Green
-                            r += rowPointer[pixelOffset + 2]; // Red
-                            sampleCount++;
-                        }
+                        int pixelOffset = j * 4;
+                        b += rowPointer[pixelOffset];     // Blue
+                        g += rowPointer[pixelOffset + 1]; // Green
+                        r += rowPointer[pixelOffset + 2]; // Red
+                        sampleCount++;
                     }
                 }
             }
@@ -59,7 +56,7 @@ namespace AmbientHue.CaptureColor
                 b /= sampleCount;
             }
 
-            return Color.FromArgb(0, (int)r, (int)g, (int)b);
+            return Color.FromArgb(255, (int)r, (int)g, (int)b);
         }
     }
 }

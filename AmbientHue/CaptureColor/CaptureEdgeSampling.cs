@@ -24,67 +24,64 @@ namespace AmbientHue.CaptureColor
             {
                 srcData = bitmap.LockBits(bounds, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
-                unsafe
+                byte* srcPointer = (byte*)srcData.Scan0;
+                int stride = srcData.Stride;
+
+                // Sample top edge
+                for (int i = 0; i < EdgeThickness && i < bounds.Height; i += SampleStride)
                 {
-                    byte* srcPointer = (byte*)srcData.Scan0;
-                    int stride = srcData.Stride;
-
-                    // Sample top edge
-                    for (int i = 0; i < EdgeThickness && i < bounds.Height; i += SampleStride)
+                    byte* rowPointer = srcPointer + (i * stride);
+                    for (int j = 0; j < bounds.Width; j += SampleStride)
                     {
-                        byte* rowPointer = srcPointer + (i * stride);
-                        for (int j = 0; j < bounds.Width; j += SampleStride)
-                        {
-                            int pixelOffset = j * 4;
-                            b += rowPointer[pixelOffset];
-                            g += rowPointer[pixelOffset + 1];
-                            r += rowPointer[pixelOffset + 2];
-                            sampleCount++;
-                        }
+                        int pixelOffset = j * 4;
+                        b += rowPointer[pixelOffset];
+                        g += rowPointer[pixelOffset + 1];
+                        r += rowPointer[pixelOffset + 2];
+                        sampleCount++;
                     }
+                }
 
-                    // Sample bottom edge
-                    for (int i = bounds.Height - EdgeThickness; i < bounds.Height; i += SampleStride)
+                // Sample bottom edge
+                for (int i = bounds.Height - EdgeThickness; i < bounds.Height; i += SampleStride)
+                {
+                    if (i < 0) continue;
+                    byte* rowPointer = srcPointer + (i * stride);
+                    for (int j = 0; j < bounds.Width; j += SampleStride)
                     {
-                        if (i < 0) continue;
-                        byte* rowPointer = srcPointer + (i * stride);
-                        for (int j = 0; j < bounds.Width; j += SampleStride)
-                        {
-                            int pixelOffset = j * 4;
-                            b += rowPointer[pixelOffset];
-                            g += rowPointer[pixelOffset + 1];
-                            r += rowPointer[pixelOffset + 2];
-                            sampleCount++;
-                        }
+                        int pixelOffset = j * 4;
+                        b += rowPointer[pixelOffset];
+                        g += rowPointer[pixelOffset + 1];
+                        r += rowPointer[pixelOffset + 2];
+                        sampleCount++;
                     }
+                }
 
-                    // Sample left edge (excluding corners already sampled)
-                    for (int i = EdgeThickness; i < bounds.Height - EdgeThickness; i += SampleStride)
+                // Sample left edge (excluding corners already sampled)
+                for (int i = EdgeThickness; i < bounds.Height - EdgeThickness; i += SampleStride)
+                {
+                    byte* rowPointer = srcPointer + (i * stride);
+                    for (int j = 0; j < EdgeThickness && j < bounds.Width; j += SampleStride)
                     {
-                        byte* rowPointer = srcPointer + (i * stride);
-                        for (int j = 0; j < EdgeThickness && j < bounds.Width; j += SampleStride)
-                        {
-                            int pixelOffset = j * 4;
-                            b += rowPointer[pixelOffset];
-                            g += rowPointer[pixelOffset + 1];
-                            r += rowPointer[pixelOffset + 2];
-                            sampleCount++;
-                        }
+                        int pixelOffset = j * 4;
+                        b += rowPointer[pixelOffset];
+                        g += rowPointer[pixelOffset + 1];
+                        r += rowPointer[pixelOffset + 2];
+                        sampleCount++;
                     }
+                }
 
-                    // Sample right edge (excluding corners already sampled)
-                    for (int i = EdgeThickness; i < bounds.Height - EdgeThickness; i += SampleStride)
+                // Sample right edge (excluding corners already sampled)
+                for (int i = EdgeThickness; i < bounds.Height - EdgeThickness; i += SampleStride)
+                {
+                    byte* rowPointer = srcPointer + (i * stride);
+                    for (int j = bounds.Width - EdgeThickness; j < bounds.Width; j += SampleStride)
                     {
-                        byte* rowPointer = srcPointer + (i * stride);
-                        for (int j = bounds.Width - EdgeThickness; j < bounds.Width; j += SampleStride)
-                        {
-                            if (j < 0) continue;
-                            int pixelOffset = j * 4;
-                            b += rowPointer[pixelOffset];
-                            g += rowPointer[pixelOffset + 1];
-                            r += rowPointer[pixelOffset + 2];
-                            sampleCount++;
-                        }
+                        if (j < 0) continue;
+                        int pixelOffset = j * 4;
+                        b += rowPointer[pixelOffset];
+                        g += rowPointer[pixelOffset + 1];
+                        r += rowPointer[pixelOffset + 2];
+                        sampleCount++;
                     }
                 }
             }
@@ -103,7 +100,7 @@ namespace AmbientHue.CaptureColor
                 b /= sampleCount;
             }
 
-            return Color.FromArgb(0, (int)r, (int)g, (int)b);
+            return Color.FromArgb(255, (int)r, (int)g, (int)b);
         }
     }
 }

@@ -28,32 +28,29 @@ namespace AmbientHue.CaptureColor
             {
                 srcData = bitmap.LockBits(bounds, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
-                unsafe
-                {
-                    byte* srcPointer = (byte*)srcData.Scan0;
-                    int stride = srcData.Stride;
+                byte* srcPointer = (byte*)srcData.Scan0;
+                int stride = srcData.Stride;
 
-                    for (int i = 0; i < bounds.Height; i += SampleStride)
+                for (int i = 0; i < bounds.Height; i += SampleStride)
+                {
+                    byte* rowPointer = srcPointer + (i * stride);
+                    
+                    for (int j = 0; j < bounds.Width; j += SampleStride)
                     {
-                        byte* rowPointer = srcPointer + (i * stride);
+                        // Calculate distance from center
+                        double dx = j - centerX;
+                        double dy = i - centerY;
+                        double distance = Math.Sqrt(dx * dx + dy * dy);
                         
-                        for (int j = 0; j < bounds.Width; j += SampleStride)
-                        {
-                            // Calculate distance from center
-                            double dx = j - centerX;
-                            double dy = i - centerY;
-                            double distance = Math.Sqrt(dx * dx + dy * dy);
-                            
-                            // Weight decreases with distance from center (inverse weighting)
-                            // Center pixels have weight ~1.0, edges have weight ~0.2
-                            double weight = 1.0 - (distance / maxDistance * 0.8);
-                            
-                            int pixelOffset = j * 4;
-                            b += rowPointer[pixelOffset] * weight;     // Blue
-                            g += rowPointer[pixelOffset + 1] * weight; // Green
-                            r += rowPointer[pixelOffset + 2] * weight; // Red
-                            totalWeight += weight;
-                        }
+                        // Weight decreases with distance from center (inverse weighting)
+                        // Center pixels have weight ~1.0, edges have weight ~0.2
+                        double weight = 1.0 - (distance / maxDistance * 0.8);
+                        
+                        int pixelOffset = j * 4;
+                        b += rowPointer[pixelOffset] * weight;     // Blue
+                        g += rowPointer[pixelOffset + 1] * weight; // Green
+                        r += rowPointer[pixelOffset + 2] * weight; // Red
+                        totalWeight += weight;
                     }
                 }
             }
@@ -72,7 +69,7 @@ namespace AmbientHue.CaptureColor
                 b /= totalWeight;
             }
 
-            return Color.FromArgb(0, (int)r, (int)g, (int)b);
+            return Color.FromArgb(255, (int)r, (int)g, (int)b);
         }
     }
 }
