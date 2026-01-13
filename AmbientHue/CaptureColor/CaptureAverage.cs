@@ -48,7 +48,7 @@
             g /= nrOfPixels;
             b /= nrOfPixels;
 
-            return Color.FromArgb(0, (int)r, (int)g, (int)b);
+            return Color.FromArgb(255, (int)r, (int)g, (int)b);
         }
     }
 }
