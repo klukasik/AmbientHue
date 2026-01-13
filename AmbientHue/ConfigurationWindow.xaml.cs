@@ -1,4 +1,6 @@
 ﻿using System.Windows;
+using System.Windows.Input;
+using System.Text.RegularExpressions;
 
 namespace AmbientHue
 {
@@ -12,9 +14,20 @@ namespace AmbientHue
     /// </summary>
     public partial class ConfigurationWindow : Window
     {
+        private static readonly Regex NumericRegex = new Regex("[^0-9]+");
+
         public ConfigurationWindow()
         {
             InitializeComponent();
+        }
+
+        /// <summary>
+        /// Validates that only numeric input is allowed in the frame delay textbox
+        /// </summary>
+        private void txtFrameDelay_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Only allow digits
+            e.Handled = NumericRegex.IsMatch(e.Text);
         }
     }
 }

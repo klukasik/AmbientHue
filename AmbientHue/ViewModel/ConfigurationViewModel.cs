@@ -6,6 +6,7 @@ namespace AmbientHue.ViewModel
     using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
+    using System.Windows.Forms;
     using System.Windows.Input;
     using System.Windows.Media;
 
@@ -100,6 +101,41 @@ namespace AmbientHue.ViewModel
                 this.selectedCaptureMethod = value;
 
                 OnPropertyChanged(nameof(SelectedCaptureMethod));
+            }
+        }
+
+        private readonly ObservableCollection<string> screens = new ObservableCollection<string>();
+        public ObservableCollection<string> Screens => this.screens;
+
+        private int selectedScreenIndex;
+        public int SelectedScreenIndex
+        {
+            get
+            {
+                return this.selectedScreenIndex;
+            }
+            set
+            {
+                this.hueConfiguration.SelectedScreenIndex = value;
+                this.selectedScreenIndex = value;
+
+                OnPropertyChanged(nameof(SelectedScreenIndex));
+            }
+        }
+
+        private int frameDelayMs;
+        public int FrameDelayMs
+        {
+            get
+            {
+                return this.frameDelayMs;
+            }
+            set
+            {
+                this.hueConfiguration.FrameDelayMs = value;
+                this.frameDelayMs = value;
+
+                OnPropertyChanged(nameof(FrameDelayMs));
             }
         }
 
@@ -208,6 +244,25 @@ namespace AmbientHue.ViewModel
 
             this.selectedCaptureMethod = this.hueConfiguration.CaptureMethod.ToString();
 
+            // Initialize screens
+            var allScreens = Screen.AllScreens;
+            for (int i = 0; i < allScreens.Length; i++)
+            {
+                var screen = allScreens[i];
+                string screenName = screen.Primary ? $"Screen {i + 1} (Primary) - {screen.Bounds.Width}x{screen.Bounds.Height}" 
+                                                    : $"Screen {i + 1} - {screen.Bounds.Width}x{screen.Bounds.Height}";
+                this.screens.Add(screenName);
+            }
+
+            this.selectedScreenIndex = this.hueConfiguration.SelectedScreenIndex;
+            if (this.selectedScreenIndex < 0 || this.selectedScreenIndex >= allScreens.Length)
+            {
+                this.selectedScreenIndex = 0; // Fallback to primary screen
+            }
+
+            // Initialize frame delay
+            this.frameDelayMs = this.hueConfiguration.FrameDelayMs;
+
             this.Color = Color.Blue;
         }
 
@@ -233,8 +288,8 @@ namespace AmbientHue.ViewModel
                 return new RelayCommand(
                     () =>
                     {
-                        Application.Current.MainWindow.Hide();
-                        Application.Current.MainWindow = null;
+                        System.Windows.Application.Current.MainWindow.Hide();
+                        System.Windows.Application.Current.MainWindow = null;
                     }
                 );
             }
