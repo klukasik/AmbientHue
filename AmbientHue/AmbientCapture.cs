@@ -15,6 +15,9 @@
 
     public class AmbientCapture
     {
+        private const int DefaultFrameDelayMs = 100; // ~10 fps by default to reduce CPU load
+        private const int DownsampleFactor = 4; // Reduce resolution by 4x for faster processing
+
         public async void StartCapture(IHueConfiguration hueConfiguration, Action<Color, long> setStatusAction, CancellationTokenSource cancellationToken)
         {
             ILocalHueClient client = new LocalHueClient(hueConfiguration.IP);
@@ -24,36 +27,33 @@
             string lightId = lights.First(l => l.Name == hueConfiguration.LightName).Id;
 
             Rectangle bounds = Screen.GetBounds(Point.Empty);
-            using (Bitmap bitmap = new Bitmap(bounds.Width, bounds.Height))
+            
+            // Create downsampled bitmap for faster processing
+            int downsampledWidth = bounds.Width / DownsampleFactor;
+            int downsampledHeight = bounds.Height / DownsampleFactor;
+            Rectangle downsampledBounds = new Rectangle(0, 0, downsampledWidth, downsampledHeight);
+            
+            using (Bitmap fullBitmap = new Bitmap(bounds.Width, bounds.Height))
+            using (Bitmap downsampledBitmap = new Bitmap(downsampledWidth, downsampledHeight))
             {
-                using (Graphics graphics = Graphics.FromImage(bitmap))
+                using (Graphics fullGraphics = Graphics.FromImage(fullBitmap))
+                using (Graphics downsampledGraphics = Graphics.FromImage(downsampledBitmap))
                 {
+                    // Create capture method instance once outside the loop
+                    ICaptureColor captureColor = CreateCaptureMethod(hueConfiguration.CaptureMethod);
+                    
                     while (cancellationToken.IsCancellationRequested == false)
                     {
                         var watch = System.Diagnostics.Stopwatch.StartNew();
-                        graphics.CopyFromScreen(Point.Empty, Point.Empty, bounds.Size);
+                        
+                        // Capture full screen
+                        fullGraphics.CopyFromScreen(Point.Empty, Point.Empty, bounds.Size);
+                        
+                        // Downsample to smaller bitmap for faster color processing
+                        downsampledGraphics.DrawImage(fullBitmap, 0, 0, downsampledWidth, downsampledHeight);
 
-                        ICaptureColor captureColor;
-                        switch (hueConfiguration.CaptureMethod)
-                        {
-                            case CaptureMethod.Quantize:
-                                captureColor = new Quantize();
-                                break;
-
-                            case CaptureMethod.Dominant:
-                                captureColor = new CaptureDominant();
-                                break;
-
-                            case CaptureMethod.Prominent:
-                                captureColor = new ProminentColor();
-                                break;
-
-                            default:
-                                captureColor = new CaptureAverage();
-                                break;
-                        }
-
-                        Color color = captureColor.Capture(bitmap, bounds);
+                        // Process downsampled image
+                        Color color = captureColor.Capture(downsampledBitmap, downsampledBounds);
 
                         var rgbColor = new RGBColor(color.R / 255.0, color.G / 255.0, color.B / 255.0);
                         
@@ -68,8 +68,42 @@
                         var elapsedMs = watch.ElapsedMilliseconds;
 
                         setStatusAction(color, elapsedMs);
+                        
+                        // Add delay to prevent 100% CPU usage and limit update rate
+                        int delayMs = Math.Max(0, DefaultFrameDelayMs - (int)elapsedMs);
+                        if (delayMs > 0)
+                        {
+                            await System.Threading.Tasks.Task.Delay(delayMs, cancellationToken.Token);
+                        }
                     }
                 }
+            }
+        }
+        
+        private ICaptureColor CreateCaptureMethod(CaptureMethod method)
+        {
+            switch (method)
+            {
+                case CaptureMethod.Quantize:
+                    return new Quantize();
+
+                case CaptureMethod.Dominant:
+                    return new CaptureDominant();
+
+                case CaptureMethod.Prominent:
+                    return new ProminentColor();
+
+                case CaptureMethod.GridSampling:
+                    return new CaptureGridSampling();
+
+                case CaptureMethod.CenterWeighted:
+                    return new CaptureCenterWeighted();
+
+                case CaptureMethod.EdgeSampling:
+                    return new CaptureEdgeSampling();
+
+                default:
+                    return new CaptureAverage();
             }
         }
     }

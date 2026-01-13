@@ -5,6 +5,9 @@
         Average,
         Quantize,
         Dominant,
-        Prominent
+        Prominent,
+        GridSampling,
+        CenterWeighted,
+        EdgeSampling
     }
 }
