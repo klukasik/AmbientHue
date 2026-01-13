@@ -6,6 +6,8 @@
         string AppKey { get; set; }
         string LightName { get; set; }
         CaptureMethod CaptureMethod { get; set; }
+        int SelectedScreenIndex { get; set; }
+        int FrameDelayMs { get; set; }
         bool IsCapturePossible { get; }
     }
 }

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         DataContext="{Binding Configuration, Source={StaticResource Locator}}"
-        Title="Ambient Hue Configuration" Height="243.964" Width="434.909" ResizeMode="CanMinimize">
+        Title="Ambient Hue Configuration" Height="310" Width="435" ResizeMode="CanMinimize">
     <Grid>
         <Label x:Name="lblBridge" Content="Bridge" HorizontalAlignment="Left" Margin="33,31,0,0" VerticalAlignment="Top"/>
         <ComboBox x:Name="cmbBridge" HorizontalAlignment="Left" Margin="86,34,0,0" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Path=Bridges}" SelectedItem="{Binding SelectedBridge}" />
@@ -18,8 +18,12 @@
         <ComboBox x:Name="cmbLight" HorizontalAlignment="Left" Margin="86,138,0,0" VerticalAlignment="Top" Width="120" ItemsSource="{Binding Lights}" SelectedItem="{Binding SelectedLight}" />
         <Label x:Name="lblCaptureMethod" Content="Capture method" HorizontalAlignment="Left" Margin="33,165,0,0" VerticalAlignment="Top"/>
         <ComboBox x:Name="cmbCaptureMethod" HorizontalAlignment="Left" Margin="146,168,0,0" VerticalAlignment="Top" Width="120" ItemsSource="{Binding CaptureMethods}" SelectedItem="{Binding SelectedCaptureMethod}" />
+        <Label x:Name="lblScreen" Content="Screen" HorizontalAlignment="Left" Margin="33,195,0,0" VerticalAlignment="Top"/>
+        <ComboBox x:Name="cmbScreen" HorizontalAlignment="Left" Margin="86,198,0,0" VerticalAlignment="Top" Width="316" ItemsSource="{Binding Screens}" SelectedIndex="{Binding SelectedScreenIndex}" />
+        <Label x:Name="lblFrameDelay" Content="Frame delay (ms)" HorizontalAlignment="Left" Margin="33,225,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtFrameDelay" HorizontalAlignment="Left" Margin="146,228,0,0" VerticalAlignment="Top" Width="120" Text="{Binding FrameDelayMs, UpdateSourceTrigger=PropertyChanged}" />
         <Label x:Name="lblColor" Content="" HorizontalAlignment="Left" Margin="372,57,0,0" VerticalAlignment="Top" Background="{Binding Background}" Width="30" />
         <Label x:Name="lblElapsecMsec" Content="{Binding ElapsedMsec}" HorizontalAlignment="Left" Margin="342,97,0,0" VerticalAlignment="Top" />
-        <Button x:Name="btnHide" Content="Hide Window" HorizontalAlignment="Left" Margin="281,169,0,0" VerticalAlignment="Top" Width="121" Command="{Binding HideWindowCommand}"/>
+        <Button x:Name="btnHide" Content="Hide Window" HorizontalAlignment="Left" Margin="281,255,0,0" VerticalAlignment="Top" Width="121" Command="{Binding HideWindowCommand}"/>
     </Grid>
 </Window>

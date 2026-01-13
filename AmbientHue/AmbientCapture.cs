@@ -16,7 +16,6 @@
 
     public class AmbientCapture
     {
-        private const int DefaultFrameDelayMs = 100; // ~10 fps by default to reduce CPU load
         private const int DownsampleFactor = 4; // Reduce resolution by 4x for faster processing
 
         public async void StartCapture(IHueConfiguration hueConfiguration, Action<Color, long> setStatusAction, CancellationTokenSource cancellationToken)
@@ -27,7 +26,25 @@
             var lights = await client.GetLightsAsync();
             string lightId = lights.First(l => l.Name == hueConfiguration.LightName).Id;
 
-            Rectangle bounds = Screen.GetBounds(Point.Empty);
+            // Get the selected screen or fallback to primary screen
+            Screen[] allScreens = Screen.AllScreens;
+            int screenIndex = hueConfiguration.SelectedScreenIndex;
+            
+            // Validate screen index and fallback to primary screen if invalid
+            if (screenIndex < 0 || screenIndex >= allScreens.Length)
+            {
+                screenIndex = 0; // Use primary screen
+            }
+            
+            Screen selectedScreen = allScreens[screenIndex];
+            Rectangle bounds = selectedScreen.Bounds;
+            
+            // Get configured frame delay
+            int frameDelayMs = hueConfiguration.FrameDelayMs;
+            if (frameDelayMs < 10)
+            {
+                frameDelayMs = 10; // Minimum 10ms to prevent excessive CPU usage
+            }
             
             // Create downsampled bitmap for faster processing
             // Ensure minimum dimensions of 1x1
@@ -49,7 +66,7 @@
                         var watch = System.Diagnostics.Stopwatch.StartNew();
                         
                         // Capture full screen
-                        fullGraphics.CopyFromScreen(Point.Empty, Point.Empty, bounds.Size);
+                        fullGraphics.CopyFromScreen(bounds.Left, bounds.Top, 0, 0, bounds.Size);
                         
                         // Downsample to smaller bitmap for faster color processing
                         downsampledGraphics.DrawImage(fullBitmap, 0, 0, downsampledWidth, downsampledHeight);
@@ -72,7 +89,7 @@
                         setStatusAction(color, elapsedMs);
                         
                         // Add delay to prevent 100% CPU usage and limit update rate
-                        int delayMs = Math.Max(0, DefaultFrameDelayMs - (int)elapsedMs);
+                        int delayMs = Math.Max(0, frameDelayMs - (int)elapsedMs);
                         if (delayMs > 0)
                         {
                             await Task.Delay(delayMs, cancellationToken.Token);

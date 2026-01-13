@@ -64,6 +64,44 @@
             }
         }
 
+        public int SelectedScreenIndex
+        {
+            get
+            {
+                string screenIndex = ConfigurationManager.AppSettings["SelectedScreenIndex"];
+                if (string.IsNullOrEmpty(screenIndex) || !int.TryParse(screenIndex, out int index))
+                {
+                    return 0; // Default to primary screen
+                }
+
+                return index;
+            }
+            set
+            {
+                this.Save("SelectedScreenIndex", value.ToString());
+                ConfigurationManager.AppSettings["SelectedScreenIndex"] = value.ToString();
+            }
+        }
+
+        public int FrameDelayMs
+        {
+            get
+            {
+                string frameDelay = ConfigurationManager.AppSettings["FrameDelayMs"];
+                if (string.IsNullOrEmpty(frameDelay) || !int.TryParse(frameDelay, out int delay))
+                {
+                    return 100; // Default to 100ms (~10 fps)
+                }
+
+                return delay;
+            }
+            set
+            {
+                this.Save("FrameDelayMs", value.ToString());
+                ConfigurationManager.AppSettings["FrameDelayMs"] = value.ToString();
+            }
+        }
+
         public bool IsCapturePossible => string.IsNullOrEmpty(this.IP) == false && string.IsNullOrEmpty(this.AppKey) == false
                                          && string.IsNullOrEmpty(this.LightName) == false;
 
